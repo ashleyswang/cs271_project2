@@ -1,3 +1,4 @@
+from recorder import Recorder
 from snapshot import Snapshot
 from utility import *
 
@@ -10,8 +11,7 @@ class Process:
     self.balance = 10  
     self.outgoing = [None] * 4
     self.incoming = [None] * 4
-
-    self.states = {}
+    self.recorder = {}
 
   def create_snapshot(self, llc=None, pid=None): 
     if llc is None: llc = self.llc
