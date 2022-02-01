@@ -1,9 +1,7 @@
-import socketserver
-from venv import create
 from snapshot import Snapshot
 from utility import *
 
-class GlobalState:
+class Process:
 
   def __init__(self, pid):
     self.pid = pid
