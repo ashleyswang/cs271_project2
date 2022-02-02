@@ -3,7 +3,7 @@ from utility import *
 
 class Snapshot:
 
-  def __init__(self, llc, pid, balance): 
+  def __init__(self, llc, pid): 
     self.id = (llc, pid)
     self.process_states = [None] * 4
     self.channel_states = {}
@@ -27,8 +27,24 @@ class Snapshot:
     return (None not in self.process_states and 
       self.get_local_ready_state())
 
-  def send_formatting(self):
-    pass
+  def get_snapshot_data(self):
+    return {
+      "op" : "MARKER",
+      "id" : self.id,
+      "pr_state" : self.process_states,
+      "ch_state" : self.channel_states
+    }
+
+  def merge_snapshot_data(self, data):
+    if (data["id"] != self.id):
+      print("not the same id, no update")
+      return
+
+    # Merge Process & Channel States
+    pstate = data["pr_state"]
+    self.process_states = [pstate[i] if pstate[i] != None 
+      else self.process_states[i] for i in range(4)]
+    self.channel_states = data["ch_state"] | self.channel_states
 
   # TODO: finish
   def print(self):
