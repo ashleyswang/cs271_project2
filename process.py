@@ -3,7 +3,6 @@ from snapshot import Snapshot
 from utility import *
 
 class Process:
-
   def __init__(self, pid):
     self.pid = pid
     self.llc = 0
@@ -13,38 +12,33 @@ class Process:
     self.incoming = [None] * 4
     self.recorder = {}
 
-  def create_snapshot(self, llc=None, pid=None): 
-    if llc is None: llc = self.llc
-    if pid is None: pid = self.pid
-    snapshot = Snapshot(llc, pid, self.balance)
-    self.states[snapshot.id] = snapshot
-    return snapshot
-
-  def send_markers(self, snapshot):
+  def send_markers(self, llc, pid):
     for sock in self.outgoing: 
       if sock is not None: 
         sock.sendall("MARKER", snapshot)
   
   def initiate_snapshot(self): 
-    snapshot = self.create_snapshot()
-    self.send_markers(snapshot)
-
-    # Wait for snapshot to complete
-    # print it out
+    # Check for threading, MUTEX
+    snapshot = self.recorder.create_snapshot(self.llc, self.pid)
+    self.send_markers(snapshot.id)
 
   def handle_incoming(self, sock, index): 
     data = sock.recv(1024)
+    # unpack
     if data == "MARKER":
       llc, pid = data[0]  # get llc and pid from data this is not actually the index though
       #second marker
-      if (llc, pid) in states.keys(): 
-        stop recording, save states of sockets
-      else: 
-        snapshot = self.create_snapshot(llc, pid)
-        snapshot.channel_state[index, self.pid] = []
-        self.send_markers(snapshot)
-    else : 
-      self.handle_transaction()
+      if (llc, pid) in self.recorder.snapshots: 
+        self.recorder.close_channel(llc, pid, index)
+      else:
+        self.recorder.create_snapshot(llc, pid, self.balance)
+        self.recorder.close_channel(llc, pid, index)
+        self.send_markers(llc, pid)
+    else: 
+      value = 0
+      self.recorder.update_channels(index, self.pid, value)
+      self.handle_transaction(value)
 
-  def handle_transaction(self)
+  def handle_transaction(self, value):
+    self.balance += value
 

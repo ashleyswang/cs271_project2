@@ -7,9 +7,14 @@ class Recorder():
       self.snapshots = {}
       self.sockets = [None] * 4   # Sockets for receiving snapshots
 
-  def create_snapshot(self, llc, pid, balance): 
-    snapshot = Snapshot(llc, pid, balance)
+  '''
+  Saves local state and starts recording incoming channels
+  '''
+  def create_snapshot(self, id, pid, balance): 
+    snapshot = Snapshot(id, balance)
     self.snapshots[snapshot.id] = snapshot
+    snapshot.update_process_state(pid, balance)
+    return snapshot
 
   ''' 
   Update all current snapshots with incoming message
@@ -20,7 +25,7 @@ class Recorder():
 
   ''' socket thread '''
   def update_snapshot(): 
-    socket.recv(auwe)
+    # socket.recv(1024)
     # unpack
     # check for llc & pid
     # update snapshot

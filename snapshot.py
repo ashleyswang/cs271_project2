@@ -5,11 +5,8 @@ class Snapshot:
 
   def __init__(self, llc, pid, balance): 
     self.id = (llc, pid)
-
     self.process_states = [None] * 4
     self.channel_states = {}
-    self.update_process_state(pid, balance)
-
     self.open_channels = Network.incoming(pid).copy()
 
   def update_process_state(self, pid, value): 
