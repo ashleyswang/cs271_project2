@@ -1,8 +1,11 @@
 # Mapping letters to numbers for process IDs
-A = 0
-B = 1 
-C = 2
-D = 3
+A, B, C, D = 0, 1, 2, 3
+
+processes = {
+  'A' : A,  'B' : B, 
+  'C' : C,  'D' : D
+}
+
 
 # Network Connections
 class Network: 

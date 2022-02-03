@@ -41,6 +41,7 @@ class Recorder():
 
   ''' Handles receiving local snapshot from other processes '''
   def update_snapshot(self, sock, index): 
+    print(f'Update snapshot client {index}')
     self.sockets[index] = sock
     while True:
       try:
@@ -75,3 +76,8 @@ class Recorder():
       socket.sendall(pickle.dumps(payload))
       self.snapshots.remove(snapshot.id)     
 
+  ''' Close sockets '''
+  def close_sockets(self): 
+    for sock in self.sockets:
+      if sock is not None:
+        sock.close()

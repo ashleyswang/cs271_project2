@@ -36,6 +36,7 @@ class Process:
   ''' Thread for handling messages on incoming sockets '''
   def handle_incoming(self, sock, index): 
     self.incoming[index] = sock
+    print(f'handle incoming client {index}')
     while True:
       try:
         data = pickle.loads(sock.recv(1024))
@@ -63,6 +64,11 @@ class Process:
     self.incoming[index] = None
 
 
+  ''' Add socket to outgoing list '''
+  def handle_outgoing(self, sock, index): 
+    self.outgoing[index] = sock
+
+
   ''' Sends markers to all outgoing connections'''
   def _send_markers(self, snapshot_id):
     payload = { 'op' : 'MARKER', 'id' : snapshot_id }
@@ -85,3 +91,12 @@ class Process:
     else: self.llc += 1
     print(f"LLC: {(self.llc, self.pid)}")
     self.mutex.release()
+
+
+  ''' Close all sockets '''
+  def close(self):
+    for sock in self.incoming + self.outgoing:
+      if sock is not None:
+        sock.close()
+
+    self.recorder.close_sockets()
