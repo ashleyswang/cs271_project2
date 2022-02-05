@@ -28,8 +28,8 @@ def handle_input():
     elif data[0] == "connect":
       connect_outgoing(PROC)
     elif data[0] == "snapshot":
+      print('Initiating Global Snapshot Protocol...')
       PROC.initiate_snapshot()
-      print('initiate snapshot')
     elif data[0] == "balance":
       get_balance()
     elif data[0] == "transfer":

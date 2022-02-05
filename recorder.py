@@ -67,7 +67,6 @@ class Recorder():
   snapshot if ready.
   '''
   def _check_ready_state(self, snapshot_id):
-    print("check ready state")
     llc, pid = snapshot_id 
     snapshot = self.snapshots[snapshot_id]
     if self.pid == pid and snapshot.get_global_ready_state(): 

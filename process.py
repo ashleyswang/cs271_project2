@@ -56,11 +56,16 @@ class Process:
       try:
         data = pickle.loads(sock.recv(1024))
         if data['op'] == 'MARKER':
-          id = data['id'] 
+          id = data['id']
+          notice(f"Received MARKER for Snapshot {(id[0], processes[id[1]])}") 
           if id in self.recorder.snapshots: 
+            notice(f"Second MARKER: Closing Channel {processes[index]} -> {processes[self.pid]}")
+            self.recorder.update_channels(index, self.pid, data)
             self.recorder.close_channel(id, index)
           else:
+            notice(f"First MARKER: Recording Channel {processes[index]} -> {processes[self.pid]}")
             self.recorder.create_snapshot(id, self.pid, self.balance)
+            self.recorder.update_channels(index, self.pid, data)
             self.recorder.close_channel(id, index)
             self._send_markers(id)
         elif data['op'] == "TRANSFER":

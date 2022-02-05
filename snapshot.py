@@ -15,6 +15,7 @@ class Snapshot:
   def update_channel_state(self, src, dest, value): 
     if (src, dest) not in self.channel_states: 
       self.channel_states[src, dest] = []
+    # check if it's marker, if marker id is equal to self id don't add
     self.channel_states[src, dest] += [value]
 
   def close_channel_state(self, src, dest): 
@@ -52,10 +53,10 @@ class Snapshot:
   def print(self):
     print("---------------")
     print(f"Local States:\
-      \n\tA: {self.process_states[A]}\
-      \n\tB: {self.process_states[B]}\
-      \n\tC: {self.process_states[C]}\
-      \n\tD: {self.process_states[D]}\n"
+      \n\tA: ${self.process_states[A]}\
+      \n\tB: ${self.process_states[B]}\
+      \n\tC: ${self.process_states[C]}\
+      \n\tD: ${self.process_states[D]}\n"
       )
     print("Channel States")
     for src, dest in self.channel_states:
