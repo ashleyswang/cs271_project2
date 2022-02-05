@@ -1,5 +1,5 @@
-from concurrent.futures import process
 from utility import *
+from logging import *
 
 class Snapshot:
 
@@ -17,8 +17,9 @@ class Snapshot:
       self.channel_states[src, dest] = []
     self.channel_states[src, dest] += [value]
 
-  def close_channel_state(self, src): 
-    print(self.open_channels, src)
+  def close_channel_state(self, src, dest): 
+    if (src, dest) not in self.channel_states: 
+      self.channel_states[src, dest] = []
     self.open_channels.remove(src)
 
   def get_local_ready_state(self):
@@ -38,7 +39,7 @@ class Snapshot:
 
   def merge_snapshot_data(self, data):
     if (data["id"] != self.id):
-      print("not the same id, no update")
+      fail("not the same id, no update")
       return
 
     # Merge Process & Channel States
@@ -49,5 +50,14 @@ class Snapshot:
 
   # TODO: finish
   def print(self):
-    print(self.process_states)
-    print(self.channel_states)
+    print("---------------")
+    print(f"Local States:\
+      \n\tA: {self.process_states[A]}\
+      \n\tB: {self.process_states[B]}\
+      \n\tC: {self.process_states[C]}\
+      \n\tD: {self.process_states[D]}\n"
+      )
+    print("Channel States")
+    for src, dest in self.channel_states:
+      print(f"\t{processes[src]} -> {processes[dest]}: {self.channel_states[src, dest]}")
+    print("---------------")

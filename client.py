@@ -14,8 +14,8 @@ DELAY = 3
 
 def do_exit():
   PROC.close()
-  cserver.close()
   iserver.close()
+  cserver.close()
   os._exit(0)
 
 
@@ -34,8 +34,8 @@ def handle_input():
       get_balance()
     elif data[0] == "transfer":
       try: 
-        recipient = processes[data[1]]
-        amount = round(float(data[2].strip('$')), 2)
+        amount = round(float(data[1].strip('$')), 2)
+        recipient = processes[data[2]]
         do_transfer(recipient, amount)
       except ValueError:
         print("Invalid argument types. Please input a integer PID and float amount.")
@@ -46,7 +46,7 @@ def handle_input():
     #   print("Invalid command. Valid inputs are 'connect', 'snapshot', 'balance', 'transfer', or 'exit/quit'.")
 
 def get_balance():
-  print(PROC.balance)
+  print(f"Balance: ${PROC.balance:.2f}", flush=True)
 
 def do_transfer(pid, value):
   PROC.do_transfer(pid, value)
@@ -60,8 +60,8 @@ if __name__ == "__main__":
   PROC = Process(PID)
  
   # Connect to Client & Server Machines
-  cserver = connect_channels(PROC)
   iserver = connect_incoming(PROC)  
+  cserver = connect_channels(PROC)
 
   # Handle User Input
   handle_input()

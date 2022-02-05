@@ -38,13 +38,12 @@ class Recorder():
   ''' Stop recording channel `src` for snapshot (llc, pid) '''
   def close_channel(self, snapshot_id, src):
     snapshot = self.snapshots[snapshot_id]
-    snapshot.close_channel_state(src)
+    snapshot.close_channel_state(src, self.pid)
     self._check_ready_state(snapshot_id)
 
 
   ''' Handles receiving local snapshot from other processes '''
   def update_snapshot(self, sock, index): 
-    print(f'Update snapshot client {index}')
     self.sockets[index] = sock
     while True:
       try:

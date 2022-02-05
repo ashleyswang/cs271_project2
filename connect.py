@@ -3,6 +3,7 @@ import socket
 import threading
 
 from utility import *
+from logging import *
 
 ''' Connect channels for relaying finished snapshot '''
 def connect_channels(proc):
@@ -12,7 +13,7 @@ def connect_channels(proc):
     while True: 
       sock, addr = server.accept()
       pid = pickle.loads(sock.recv(1024))
-      print(f"connected to {pid}")
+      info(f"SNAPSHOT: Connected to Client {processes[pid]}")
       threading.Thread(target=proc.recorder.update_snapshot, 
                        args=(sock, pid)).start()
 
@@ -22,11 +23,11 @@ def connect_channels(proc):
       sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       sock.connect((socket.gethostname(), 5000+pid))
       sock.sendall(pickle.dumps(proc.pid))
-      print(f"CHANNELS: Connected to Client {pid}")
+      info(f"SNAPSHOT: Connected to Client {processes[pid]}")
       threading.Thread(target=proc.recorder.update_snapshot, 
                        args=(sock, pid)).start()
     except ConnectionRefusedError:
-      print(f"CHANNELS: Failed to connect to Client {pid}.")
+      fail(f"SNAPSHOT: Failed Connection to Client {processes[pid]}.")
 
   # Connection protocol
   server = socket.socket()
@@ -47,7 +48,7 @@ def connect_incoming(proc):
     while True: 
       sock, addr = server.accept()
       pid = pickle.loads(sock.recv(1024))
-      print(f"incoming connected {pid}")
+      success(f"Connected to Incoming Client {processes[pid]}")
       threading.Thread(target=proc.handle_incoming, 
                        args=(sock, pid)).start()
 
@@ -55,6 +56,7 @@ def connect_incoming(proc):
   server = socket.socket()
   server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   server.bind((socket.gethostname(), 8000 + proc.pid))
+  info("Listening for Incoming Client Connections...")
   threading.Thread(target=listen, args=(server, proc)).start()
   return server
 
@@ -67,10 +69,10 @@ def connect_outgoing(proc):
       sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       sock.connect((socket.gethostname(), 8000+pid))
       sock.sendall(pickle.dumps(proc.pid))
-      print(f"OUTGOING: Connected to Client {pid}")
+      success(f"Connected to Outgoing Client {processes[pid]}")
       proc.handle_outgoing(sock, pid)
     except ConnectionRefusedError:
-      print(f"OUTGOING: Failed to connect to Client {pid}.")
+      fail(f"Failed Connection to Outgoing Client {processes[pid]}")
 
   for i in Network.outgoing(proc.pid):
     connect(i, proc)

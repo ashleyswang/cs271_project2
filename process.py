@@ -4,6 +4,8 @@ import time
 import threading
 
 from recorder import Recorder
+from utility import *
+from logging import *
 
 DELAY = 3
 
@@ -30,16 +32,20 @@ class Process:
   ''' Transfers $value to process dest if enough balance '''
   def do_transfer(self, dest, value): 
     if self.balance < value: 
-      print("Not enough balance")
+      print("Transfer: INSUFFICIENT BALANCE")
       return False
     socket = self.outgoing[dest]
     if socket is None: 
-      print("not connected to client")
+      print("Transfer: NOT CONNECTED TO CLIENT")
       return False
     payload = { 'op' : 'TRANSFER', 'value' : value }
+    bal_before = self.balance
     self._update_balance(-value)
     time.sleep(DELAY)
     socket.sendall(pickle.dumps(payload))
+    print("Transfer: SUCCESS")
+    print(f"    Balance before: ${bal_before:.2f}", flush=True)
+    print(f"    Balance after : ${self.balance:.2f}", flush=True)
     return True
     
 
@@ -49,7 +55,6 @@ class Process:
     while True:
       try:
         data = pickle.loads(sock.recv(1024))
-        print(data)
         if data['op'] == 'MARKER':
           id = data['id'] 
           if id in self.recorder.snapshots: 
@@ -58,12 +63,16 @@ class Process:
             self.recorder.create_snapshot(id, self.pid, self.balance)
             self.recorder.close_channel(id, index)
             self._send_markers(id)
-        elif data['op'] == "TRANSFER": 
+        elif data['op'] == "TRANSFER":
           value = data['value']
+          bal_before = self.balance
           self._update_balance(value)
           self.recorder.update_channels(index, self.pid, value)
+          print(f"Transfer: RECEIVED ${value:.2f} FROM CLIENT {processes[index]}")
+          print(f"    Balance before: ${bal_before:.2f}", flush=True)
+          print(f"    Balance after : ${self.balance:.2f}", flush=True)
       except EOFError:
-        print(f"Disconnected from Client {index}")
+        fail(f"Disconnected from Client {processes[index]}")
         sock.close()
         self.incoming[index] = None
         sys.exit()
@@ -99,7 +108,7 @@ class Process:
     self.mutex.acquire()
     if (value): self.llc = max(value, self.llc) + 1
     else: self.llc += 1
-    print(f"LLC: {(self.llc, self.pid)}")
+    log(f"LLC: {(self.llc, processes[self.pid])}")
     self.mutex.release()
 
 
