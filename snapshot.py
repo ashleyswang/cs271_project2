@@ -3,11 +3,11 @@ from utility import *
 
 class Snapshot:
 
-  def __init__(self, llc, pid): 
-    self.id = (llc, pid)
+  def __init__(self, snapshot_id, host_id): 
+    self.id = snapshot_id
     self.process_states = [None] * 4
     self.channel_states = {}
-    self.open_channels = Network.incoming(pid).copy()
+    self.open_channels = Network.incoming(host_id).copy()
 
   def update_process_state(self, pid, value): 
     self.process_states[pid] = value
@@ -18,6 +18,7 @@ class Snapshot:
     self.channel_states[src, dest] += [value]
 
   def close_channel_state(self, src): 
+    print(self.open_channels, src)
     self.open_channels.remove(src)
 
   def get_local_ready_state(self):
@@ -48,4 +49,5 @@ class Snapshot:
 
   # TODO: finish
   def print(self):
-    pass
+    print(self.process_states)
+    print(self.channel_states)

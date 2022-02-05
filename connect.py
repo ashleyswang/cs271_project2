@@ -13,8 +13,8 @@ def connect_channels(proc):
       sock, addr = server.accept()
       pid = pickle.loads(sock.recv(1024))
       print(f"connected to {pid}")
-      # threading.Thread(target=proc.recorder.update_snapshot, 
-      #                  args=(sock, pid)).start()
+      threading.Thread(target=proc.recorder.update_snapshot, 
+                       args=(sock, pid)).start()
 
   # Connect to listener of other clients
   def connect(pid, proc):
@@ -23,8 +23,8 @@ def connect_channels(proc):
       sock.connect((socket.gethostname(), 5000+pid))
       sock.sendall(pickle.dumps(proc.pid))
       print(f"CHANNELS: Connected to Client {pid}")
-      # threading.Thread(target=proc.recorder.update_snapshot, 
-      #                  args=(sock, pid)).start()
+      threading.Thread(target=proc.recorder.update_snapshot, 
+                       args=(sock, pid)).start()
     except ConnectionRefusedError:
       print(f"CHANNELS: Failed to connect to Client {pid}.")
 
@@ -36,7 +36,6 @@ def connect_channels(proc):
 
   for i in range(proc.pid):
     connect(i, proc)
-
   return server
 
 
@@ -49,8 +48,8 @@ def connect_incoming(proc):
       sock, addr = server.accept()
       pid = pickle.loads(sock.recv(1024))
       print(f"incoming connected {pid}")
-      # threading.Thread(target=proc.handle_incoming, 
-      #                  args=(sock, pid)).start()
+      threading.Thread(target=proc.handle_incoming, 
+                       args=(sock, pid)).start()
 
   # Connection Protocol
   server = socket.socket()

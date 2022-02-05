@@ -20,18 +20,35 @@ def do_exit():
 
 def handle_input():
   while True:
-    try:
-      data = input().split()
-      if data[0] == "exit" or data[0] == "quit":
-        do_exit()
-      elif data[0] == "connect":
-        connect_outgoing(PROC)
-      else:
-        print("Invalid command. Valid inputs are 'balance', 'transfer', or 'exit/quit'.")
-    except Exception: 
-      print("Invalid command. Valid inputs are 'balance', 'transfer', or 'exit/quit'.")
+    # try:
+    data = input().split()
+    if data[0] == "exit" or data[0] == "quit":
+      do_exit()
+    elif data[0] == "connect":
+      connect_outgoing(PROC)
+    elif data[0] == "snapshot":
+      PROC.initiate_snapshot()
+      print('initiate snapshot')
+    elif data[0] == "balance":
+      get_balance()
+    elif data[0] == "transfer":
+      try: 
+        recipient = processes[data[1]]
+        amount = round(float(data[2].strip('$')), 2)
+        do_transfer(recipient, amount)
+      except ValueError:
+        print("Invalid argument types. Please input a integer PID and float amount.")
+    else:
+      print("Invalid command. Valid inputs are 'connect', 'snapshot', 'balance', 'transfer', or 'exit/quit'.")
+    # except Exception as e: 
+    #   print(e)
+    #   print("Invalid command. Valid inputs are 'connect', 'snapshot', 'balance', 'transfer', or 'exit/quit'.")
 
+def get_balance():
+  print(PROC.balance)
 
+def do_transfer(pid, value):
+  PROC.do_transfer(pid, value)
 
 if __name__ == "__main__":
   if len(sys.argv) != 2:

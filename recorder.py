@@ -1,8 +1,11 @@
 import pickle
 import sys
+import time
 import threading
 
 from snapshot import Snapshot
+
+DELAY = 3
 
 class Recorder(): 
   def __init__(self, pid):
@@ -18,7 +21,7 @@ class Recorder():
 
   ''' Saves local state and starts recording incoming channels '''
   def create_snapshot(self, snapshot_id, pid, balance): 
-    snapshot = Snapshot(*snapshot_id)
+    snapshot = Snapshot(snapshot_id, pid)
     self.snapshots[snapshot.id] = snapshot
     snapshot.update_process_state(pid, balance)
     return snapshot
@@ -27,7 +30,7 @@ class Recorder():
   ''' Update all current snapshots with incoming message '''
   def update_channels(self, src, dest, value): 
     self.mutex.acquire()
-    for id, snapshot in self.snapshots: 
+    for snapshot in self.snapshots.values(): 
       snapshot.update_channel_state(src, dest, value)
     self.mutex.release()
 
@@ -65,16 +68,18 @@ class Recorder():
   snapshot if ready.
   '''
   def _check_ready_state(self, snapshot_id):
+    print("check ready state")
     llc, pid = snapshot_id 
     snapshot = self.snapshots[snapshot_id]
     if self.pid == pid and snapshot.get_global_ready_state(): 
       snapshot.print()
-      self.snapshots.remove(snapshot.id)
+      self.snapshots.pop(snapshot.id)
     elif self.pid != pid and snapshot.get_local_ready_state(): 
       socket = self.sockets[pid]
       payload = snapshot.get_snapshot_data()
+      time.sleep(DELAY)
       socket.sendall(pickle.dumps(payload))
-      self.snapshots.remove(snapshot.id)     
+      self.snapshots.pop(snapshot.id)     
 
   ''' Close sockets '''
   def close_sockets(self): 

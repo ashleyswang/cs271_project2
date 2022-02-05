@@ -1,8 +1,11 @@
 import pickle
 import sys
+import time
 import threading
 
 from recorder import Recorder
+
+DELAY = 3
 
 class Process:
   def __init__(self, pid):
@@ -19,16 +22,23 @@ class Process:
 
   ''' Initiate global snapshot protocol '''
   def initiate_snapshot(self): 
-    snapshot = self.recorder.create_snapshot(self.llc, self.pid)
+    snapshot = self.recorder.create_snapshot(
+      (self.llc, self.pid), self.pid, self.balance)
     self._send_markers(snapshot.id)
 
 
   ''' Transfers $value to process dest if enough balance '''
   def do_transfer(self, dest, value): 
-    if self.balance < value: return False
+    if self.balance < value: 
+      print("Not enough balance")
+      return False
     socket = self.outgoing[dest]
+    if socket is None: 
+      print("not connected to client")
+      return False
     payload = { 'op' : 'TRANSFER', 'value' : value }
     self._update_balance(-value)
+    time.sleep(DELAY)
     socket.sendall(pickle.dumps(payload))
     return True
     
@@ -36,11 +46,10 @@ class Process:
   ''' Thread for handling messages on incoming sockets '''
   def handle_incoming(self, sock, index): 
     self.incoming[index] = sock
-    print(f'handle incoming client {index}')
     while True:
       try:
         data = pickle.loads(sock.recv(1024))
-        self._update_balance()
+        print(data)
         if data['op'] == 'MARKER':
           id = data['id'] 
           if id in self.recorder.snapshots: 
@@ -72,6 +81,7 @@ class Process:
   ''' Sends markers to all outgoing connections'''
   def _send_markers(self, snapshot_id):
     payload = { 'op' : 'MARKER', 'id' : snapshot_id }
+    time.sleep(DELAY)
     for sock in self.outgoing: 
       if sock is not None: 
         sock.sendall(pickle.dumps(payload))
