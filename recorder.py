@@ -28,10 +28,10 @@ class Recorder():
 
 
   ''' Update all current snapshots with incoming message '''
-  def update_channels(self, src, dest, value): 
+  def update_channels(self, src, dest, value, marker=False): 
     self.mutex.acquire()
     for snapshot in self.snapshots.values(): 
-      snapshot.update_channel_state(src, dest, value)
+      snapshot.update_channel_state(src, dest, value, marker)
     self.mutex.release()
 
 

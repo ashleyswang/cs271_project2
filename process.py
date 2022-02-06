@@ -55,17 +55,18 @@ class Process:
     while True:
       try:
         data = pickle.loads(sock.recv(1024))
+        self._update_llc()
         if data['op'] == 'MARKER':
           id = data['id']
-          notice(f"Received MARKER for Snapshot {(id[0], processes[id[1]])}") 
+          log(f"Received MARKER for Snapshot {(id[0], processes[id[1]])}") 
           if id in self.recorder.snapshots: 
             notice(f"Second MARKER: Closing Channel {processes[index]} -> {processes[self.pid]}")
-            self.recorder.update_channels(index, self.pid, data)
+            self.recorder.update_channels(index, self.pid, data, marker=True)
             self.recorder.close_channel(id, index)
           else:
             notice(f"First MARKER: Recording Channel {processes[index]} -> {processes[self.pid]}")
             self.recorder.create_snapshot(id, self.pid, self.balance)
-            self.recorder.update_channels(index, self.pid, data)
+            self.recorder.update_channels(index, self.pid, data, marker=True)
             self.recorder.close_channel(id, index)
             self._send_markers(id)
         elif data['op'] == "TRANSFER":
@@ -113,7 +114,6 @@ class Process:
     self.mutex.acquire()
     if (value): self.llc = max(value, self.llc) + 1
     else: self.llc += 1
-    log(f"LLC: {(self.llc, processes[self.pid])}")
     self.mutex.release()
 
 

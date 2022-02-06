@@ -12,10 +12,11 @@ class Snapshot:
   def update_process_state(self, pid, value): 
     self.process_states[pid] = value
 
-  def update_channel_state(self, src, dest, value): 
+  def update_channel_state(self, src, dest, value, marker=False): 
     if (src, dest) not in self.channel_states: 
       self.channel_states[src, dest] = []
-    # check if it's marker, if marker id is equal to self id don't add
+    if marker and value['id'] == self.id:
+      return
     self.channel_states[src, dest] += [value]
 
   def close_channel_state(self, src, dest): 
