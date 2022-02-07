@@ -73,7 +73,8 @@ class Snapshot:
 
   ''' Prints formatted string for snapshot'''
   def print(self):
-    print("---------------")
+    title = f"----- SNAPSHOT {self.str_id} -----"
+    print(title)
     print(f"Local States:\
       \n\tA: ${self.process_states[A]}\
       \n\tB: ${self.process_states[B]}\
@@ -85,4 +86,4 @@ class Snapshot:
     keys.sort()
     for src, dest in keys:
       print(f"\t{processes[src]} -> {processes[dest]}: {self.channel_states[src, dest]}")
-    print("---------------")
+    print("-"*len(title))
