@@ -16,6 +16,7 @@ class Snapshot:
     self.process_states[pid] = value
 
 
+  # TODO (check that channel actually stops recording)
   ''' Updates channel state with incoming messages '''
   def update_channel_state(self, src, dest, value, marker=False): 
     if (src, dest) not in self.channel_states: 
@@ -25,7 +26,7 @@ class Snapshot:
     self.channel_states[src, dest] += [value]
 
 
-  ''' Indicates that a channel has stopped recording messages '''
+  ''' Stops recording messages for channel'''
   def close_channel_state(self, src, dest): 
     if (src, dest) not in self.channel_states: 
       self.channel_states[src, dest] = []

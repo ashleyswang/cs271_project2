@@ -9,6 +9,7 @@ from logging import *
 
 DELAY = 3
 
+''' Implement snapshot protocol for a single process '''
 class Process:
   def __init__(self, pid):
     self.pid = pid
@@ -122,5 +123,4 @@ class Process:
     for sock in self.incoming + self.outgoing:
       if sock is not None:
         sock.close()
-
     self.recorder.close_sockets()
