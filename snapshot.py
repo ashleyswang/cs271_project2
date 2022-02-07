@@ -6,6 +6,7 @@ from utility import *
 class Snapshot:
   def __init__(self, snapshot_id, host_id): 
     self.id = snapshot_id
+    self.str_id = f"({snapshot_id[0]}, {processes[snapshot_id[1]]})"
     self.process_states = [None] * 4
     self.channel_states = {}
     self.open_channels = Network.incoming(host_id).copy()
@@ -16,14 +17,14 @@ class Snapshot:
     self.process_states[pid] = value
 
 
-  # TODO (check that channel actually stops recording)
   ''' Updates channel state with incoming messages '''
   def update_channel_state(self, src, dest, value, marker=False): 
     if (src, dest) not in self.channel_states: 
       self.channel_states[src, dest] = []
     if marker and value['id'] == self.id:
       return
-    self.channel_states[src, dest] += [value]
+    if (src, dest) in self.open_channels:
+      self.channel_states[src, dest] += [value]
 
 
   ''' Stops recording messages for channel'''
@@ -77,7 +78,7 @@ class Snapshot:
       \n\tD: ${self.process_states[D]}\n"
       )
     print("Channel States")
-    keys = self.channel_states.keys()
+    keys = list(self.channel_states.keys())
     keys.sort()
     for src, dest in keys:
       print(f"\t{processes[src]} -> {processes[dest]}: {self.channel_states[src, dest]}")

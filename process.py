@@ -25,6 +25,7 @@ class Process:
 
   ''' Initiate global snapshot protocol '''
   def initiate_snapshot(self): 
+    self._update_llc()
     snapshot = self.recorder.create_snapshot(
       (self.llc, self.pid), self.pid, self.balance)
     self._send_markers(snapshot.id)
@@ -32,6 +33,7 @@ class Process:
 
   ''' Transfers $value to process dest if enough balance '''
   def do_transfer(self, dest, value): 
+    self._update_llc()
     if self.balance < value: 
       print("Transfer: INSUFFICIENT BALANCE")
       return False
@@ -59,7 +61,7 @@ class Process:
         self._update_llc()
         if data['op'] == 'MARKER':
           id = data['id']
-          log(f"Received MARKER for Snapshot {(id[0], processes[id[1]])}") 
+          log(f"Received MARKER for Snapshot ({id[0]}, {processes[id[1]]})") 
           if id in self.recorder.snapshots: 
             notice(f"Second MARKER: Closing Channel {processes[index]} -> {processes[self.pid]}")
             self.recorder.update_channels(index, self.pid, data, marker=True)

@@ -4,6 +4,8 @@ import time
 import threading
 
 from snapshot import Snapshot
+from logging import *
+from utility import *
 
 DELAY = 3
 
@@ -52,14 +54,15 @@ class Recorder():
         data = pickle.loads(sock.recv(1024))
         snapshot = self.snapshots[data['id']]
         snapshot.merge_snapshot_data(data)
+        info(f"SNAPSHOT: Received local snapshot for {snapshot.str_id}")
         self._check_ready_state(data['id'])
       except EOFError:
-        print(f"Disconnected from Client {index}")
+        info(f"SNAPSHOT: Disconnected from Client {processes[index]}")
         sock.close()
         self.sockets[index] = None
         sys.exit()
       except Exception as e:
-        print(e)
+        info(f"SNAPSHOT: Disconnected from Client {processes[index]}")
     sock.close()
     self.sockets[index] = None
 
@@ -77,6 +80,7 @@ class Recorder():
     elif self.pid != pid and snapshot.get_local_ready_state(): 
       socket = self.sockets[pid]
       payload = snapshot.get_snapshot_data()
+      notice(f"SNAPSHOT: Ready to send local snapshot for {snapshot.str_id}")
       time.sleep(DELAY)
       socket.sendall(pickle.dumps(payload))
       self.snapshots.pop(snapshot.id)     

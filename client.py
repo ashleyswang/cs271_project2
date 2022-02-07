@@ -21,29 +21,28 @@ def do_exit():
 
 def handle_input():
   while True:
-    # try:
-    data = input().split()
-    if data[0] == "exit" or data[0] == "quit":
-      do_exit()
-    elif data[0] == "connect":
-      connect_outgoing(PROC)
-    elif data[0] == "snapshot":
-      print('Initiating Global Snapshot Protocol...')
-      PROC.initiate_snapshot()
-    elif data[0] == "balance":
-      get_balance()
-    elif data[0] == "transfer":
-      try: 
-        amount = round(float(data[1].strip('$')), 2)
-        recipient = processes[data[2]]
-        do_transfer(recipient, amount)
-      except ValueError:
-        print("Invalid argument types. Please input a integer PID and float amount.")
-    else:
+    try:
+      data = input().split()
+      if data[0] == "exit" or data[0] == "quit":
+        do_exit()
+      elif data[0] == "connect":
+        connect_outgoing(PROC)
+      elif data[0] == "snapshot":
+        print('Initiating Global Snapshot Protocol...')
+        PROC.initiate_snapshot()
+      elif data[0] == "balance":
+        get_balance()
+      elif data[0] == "transfer":
+        try: 
+          amount = round(float(data[1].strip('$')), 2)
+          recipient = processes[data[2]]
+          do_transfer(recipient, amount)
+        except ValueError:
+          print("Invalid argument types. Please input a integer PID and float amount.")
+      else:
+        print("Invalid command. Valid inputs are 'connect', 'snapshot', 'balance', 'transfer', or 'exit/quit'.")
+    except Exception as e: 
       print("Invalid command. Valid inputs are 'connect', 'snapshot', 'balance', 'transfer', or 'exit/quit'.")
-    # except Exception as e: 
-    #   print(e)
-    #   print("Invalid command. Valid inputs are 'connect', 'snapshot', 'balance', 'transfer', or 'exit/quit'.")
 
 def get_balance():
   print(f"Balance: ${PROC.balance:.2f}", flush=True)
