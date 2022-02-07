@@ -60,6 +60,8 @@ class Snapshot:
       \n\tD: ${self.process_states[D]}\n"
       )
     print("Channel States")
-    for src, dest in self.channel_states:
+    keys = self.channel_states.keys()
+    keys.sort()
+    for src, dest in keys:
       print(f"\t{processes[src]} -> {processes[dest]}: {self.channel_states[src, dest]}")
     print("---------------")
