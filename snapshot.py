@@ -1,3 +1,5 @@
+import threading
+
 from logging import *
 from utility import *
 
@@ -10,7 +12,7 @@ class Snapshot:
     self.process_states = [None] * 4
     self.channel_states = {}
     self.open_channels = Network.incoming(host_id).copy()
-
+    self.lock = threading.Lock()
 
   ''' Updates process state with current balance '''
   def update_process_state(self, pid, value): 
@@ -23,7 +25,7 @@ class Snapshot:
       self.channel_states[src, dest] = []
     if marker and value['id'] == self.id:
       return
-    if (src, dest) in self.open_channels:
+    if src in self.open_channels:
       self.channel_states[src, dest] += [value]
 
 
@@ -60,12 +62,13 @@ class Snapshot:
     if (data["id"] != self.id):
       fail("not the same id, no update")
       return
-
     # Merge Process & Channel States
+    self.lock.acquire()
     pstate = data["pr_state"]
     self.process_states = [pstate[i] if pstate[i] != None 
       else self.process_states[i] for i in range(4)]
     self.channel_states = data["ch_state"] | self.channel_states
+    self.lock.release()
 
 
   ''' Prints formatted string for snapshot'''

@@ -74,6 +74,7 @@ class Process:
             self._send_markers(id)
         elif data['op'] == "TRANSFER":
           value = data['value']
+          log(f"Received TRANSFER: Client {processes[index]} -> ${value:.2f}") 
           bal_before = self.balance
           self._update_balance(value)
           self.recorder.update_channels(index, self.pid, value)

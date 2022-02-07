@@ -53,16 +53,20 @@ class Recorder():
       try:
         data = pickle.loads(sock.recv(1024))
         snapshot = self.snapshots[data['id']]
+        self.mutex.acquire()
         snapshot.merge_snapshot_data(data)
-        info(f"SNAPSHOT: Received local snapshot for {snapshot.str_id}")
+        info(f"SNAPSHOT: Received local snapshot for {snapshot.str_id} from Client {processes[index]}")
         self._check_ready_state(data['id'])
       except EOFError:
         info(f"SNAPSHOT: Disconnected from Client {processes[index]}")
         sock.close()
         self.sockets[index] = None
         sys.exit()
-      except Exception as e:
-        info(f"SNAPSHOT: Disconnected from Client {processes[index]}")
+      # except Exception as e:
+      #   print(e)
+      #   info(f"SNAPSHOT: Disconnected from Client {processes[index]}")
+      finally:
+        self.mutex.release()
     sock.close()
     self.sockets[index] = None
 
@@ -80,7 +84,7 @@ class Recorder():
     elif self.pid != pid and snapshot.get_local_ready_state(): 
       socket = self.sockets[pid]
       payload = snapshot.get_snapshot_data()
-      notice(f"SNAPSHOT: Ready to send local snapshot for {snapshot.str_id}")
+      info(f"SNAPSHOT: Ready to send local snapshot for {snapshot.str_id}")
       time.sleep(DELAY)
       socket.sendall(pickle.dumps(payload))
       self.snapshots.pop(snapshot.id)     
