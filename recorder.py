@@ -66,7 +66,8 @@ class Recorder():
       #   print(e)
       #   info(f"SNAPSHOT: Disconnected from Client {processes[index]}")
       finally:
-        self.mutex.release()
+        if self.mutex.locked(): 
+          self.mutex.release()
     sock.close()
     self.sockets[index] = None
 
