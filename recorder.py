@@ -7,12 +7,14 @@ from snapshot import Snapshot
 
 DELAY = 3
 
+''' Keeps track of all pending snapshots for single process '''
 class Recorder(): 
   def __init__(self, pid):
       self.pid = pid
       self.snapshots = {}
       self.sockets = [None] * 4   # Sockets for receiving snapshots
       self.mutex = threading.Lock()
+
 
   ''' Initialize socket array entry '''
   def initialize_socket(self, pid, socket):
@@ -78,6 +80,7 @@ class Recorder():
       time.sleep(DELAY)
       socket.sendall(pickle.dumps(payload))
       self.snapshots.pop(snapshot.id)     
+
 
   ''' Close sockets '''
   def close_sockets(self): 
