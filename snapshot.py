@@ -14,6 +14,7 @@ class Snapshot:
     self.open_channels = Network.incoming(host_id).copy()
     self.lock = threading.Lock()
 
+
   ''' Updates process state with current balance '''
   def update_process_state(self, pid, value): 
     self.process_states[pid] = value

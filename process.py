@@ -44,6 +44,7 @@ class Process:
     payload = { 'op' : 'TRANSFER', 'value' : value }
     bal_before = self.balance
     self._update_balance(-value)
+    log(f"Sending TRANSFER: ${value:.2f} -> Client {processes[dest]}") 
     time.sleep(DELAY)
     socket.sendall(pickle.dumps(payload))
     print("Transfer: SUCCESS")
@@ -100,6 +101,7 @@ class Process:
   ''' Sends markers to all outgoing connections'''
   def _send_markers(self, snapshot_id):
     payload = { 'op' : 'MARKER', 'id' : snapshot_id }
+    log(f"Sending MARKERS for Snapshot ({snapshot_id[0]}, {processes[snapshot_id[1]]})") 
     time.sleep(DELAY)
     for sock in self.outgoing: 
       if sock is not None: 
