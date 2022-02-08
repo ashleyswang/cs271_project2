@@ -39,6 +39,8 @@ def handle_input():
           do_transfer(recipient, amount)
         except ValueError:
           print("Invalid argument types. Please input a integer PID and float amount.")
+      elif data[0] == "marker":
+        PROC._send_markers((1,2))
       else:
         print("Invalid command. Valid inputs are 'connect', 'snapshot', 'balance', 'transfer', or 'exit/quit'.")
     except Exception as e: 

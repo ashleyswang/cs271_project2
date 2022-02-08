@@ -16,6 +16,7 @@ class Recorder():
       self.snapshots = {}
       self.sockets = [None] * 4   # Sockets for receiving snapshots
       self.mutex = threading.Lock()
+      self.lock = threading.Lock()
 
 
   ''' Initialize socket array entry '''
@@ -25,9 +26,11 @@ class Recorder():
 
   ''' Saves local state and starts recording incoming channels '''
   def create_snapshot(self, snapshot_id, pid, balance): 
+    self.mutex.acquire()
     snapshot = Snapshot(snapshot_id, pid)
     self.snapshots[snapshot.id] = snapshot
     snapshot.update_process_state(pid, balance)
+    self.mutex.release()
     return snapshot
 
 
@@ -41,9 +44,11 @@ class Recorder():
 
   ''' Stop recording channel `src` for snapshot (llc, pid) '''
   def close_channel(self, snapshot_id, src):
+    self.mutex.acquire()
     snapshot = self.snapshots[snapshot_id]
     snapshot.close_channel_state(src, self.pid)
     self._check_ready_state(snapshot_id)
+    self.mutex.release()
 
 
   ''' Handles receiving local snapshot from other processes '''
@@ -53,10 +58,11 @@ class Recorder():
       try:
         data = pickle.loads(sock.recv(1024))
         snapshot = self.snapshots[data['id']]
-        self.mutex.acquire()
+        self.lock.acquire()
         snapshot.merge_snapshot_data(data)
         info(f"SNAPSHOT: Received local snapshot for {snapshot.str_id} from Client {processes[index]}")
         self._check_ready_state(data['id'])
+        self.lock.release()
       except EOFError:
         info(f"SNAPSHOT: Disconnected from Client {processes[index]}")
         sock.close()
@@ -66,8 +72,8 @@ class Recorder():
       #   print(e)
       #   info(f"SNAPSHOT: Disconnected from Client {processes[index]}")
       finally:
-        if self.mutex.locked(): 
-          self.mutex.release()
+        if self.lock.locked(): 
+          self.lock.release()
     sock.close()
     self.sockets[index] = None
 
@@ -80,6 +86,7 @@ class Recorder():
     llc, pid = snapshot_id 
     snapshot = self.snapshots[snapshot_id]
     if self.pid == pid and snapshot.get_global_ready_state(): 
+      # print("global check true")
       snapshot.print()
       self.snapshots.pop(snapshot.id)
     elif self.pid != pid and snapshot.get_local_ready_state(): 

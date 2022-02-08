@@ -64,11 +64,11 @@ class Process:
           id = data['id']
           log(f"Received MARKER for Snapshot ({id[0]}, {processes[id[1]]})") 
           if id in self.recorder.snapshots: 
-            notice(f"Second MARKER: Closing Channel {processes[index]} -> {processes[self.pid]}")
+            notice(f"Second MARKER ({id[0]}, {processes[id[1]]}): Closing Channel {processes[index]} -> {processes[self.pid]}")
             self.recorder.update_channels(index, self.pid, data, marker=True)
             self.recorder.close_channel(id, index)
           else:
-            notice(f"First MARKER: Recording Channel {processes[index]} -> {processes[self.pid]}")
+            notice(f"First  MARKER ({id[0]}, {processes[id[1]]}): Closing Channel {processes[index]} -> {processes[self.pid]}")
             self.recorder.create_snapshot(id, self.pid, self.balance)
             self.recorder.update_channels(index, self.pid, data, marker=True)
             self.recorder.close_channel(id, index)

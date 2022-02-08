@@ -44,6 +44,8 @@ class Snapshot:
 
   ''' Returns true if snapshot is ready to print '''
   def get_global_ready_state(self): 
+    # print(self.process_states)
+    # print(self.get_local_ready_state())
     return (None not in self.process_states and 
       self.get_local_ready_state())
 
