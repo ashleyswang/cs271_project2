@@ -40,7 +40,10 @@ def handle_input():
         except ValueError:
           print("Invalid argument types. Please input a integer PID and float amount.")
       elif data[0] == "marker":
-        PROC._send_markers((1,2))
+        recipient, llc, pid = int(data[1]), int(data[2]), int(data[3])
+        payload = { 'op' : 'MARKER', 'id' : (llc, pid) }
+        sock = PROC.outgoing[recipient]
+        sock.sendall(pickle.dumps(payload))
       else:
         print("Invalid command. Valid inputs are 'connect', 'snapshot', 'balance', 'transfer', or 'exit/quit'.")
     except Exception as e: 
